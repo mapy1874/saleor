@@ -661,3 +661,13 @@ The shared Postgres is the scaling bottleneck — every pod hits it. Keep querie
 - Verify the file extension matches the detected file type
 
 See saleor/graphql/core/validators/file.py for how to properly validate files.
+
+## Cursor Cloud specific instructions
+
+Cloud Agents do not use `.devcontainer` or Docker Compose. The environment installs Python dependencies with `uv sync --frozen` (Python 3.12, `uv` on `PATH`) and, on boot, starts PostgreSQL 16 and Redis on localhost.
+
+- Database defaults to `postgres://saleor:saleor@localhost:5432/saleor`. `.env` is copied from `.env.example` when missing; `uv run poe …` loads it.
+- Boot runs `uv run poe migrate`, then `uv run poe populatedb` only when the catalog has no products. Sample admin: `admin@example.com` / `admin`.
+- API: `http://127.0.0.1:8000/graphql/` (tmux session `saleor-api`, log `/tmp/saleor-api.log`). Celery worker: tmux session `saleor-worker`, log `/tmp/saleor-worker.log`.
+- Tests need Postgres already running: `uv run pytest <path> --reuse-db -n0`. Lint with `uv run ruff check`.
+
